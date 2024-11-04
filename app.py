@@ -2,6 +2,7 @@ from flask import Flask, request, render_template
 import pickle
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
+from difflib import get_close_matches  # Import for handling close matches
 
 # Load the saved TF-IDF vectorizer and matrix
 with open('tfidf_vectorizer.pkl', 'rb') as f:
@@ -19,11 +20,15 @@ cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
 
 # Define the recommendation function
 def get_recommendations(title, cosine_sim=cosine_sim):
-    try:
-        idx = df[df['title'].str.lower() == title.lower()].index[0]
-    except IndexError:
+    # Check for close matches
+    close_matches = get_close_matches(title, df['title'].str.lower().tolist())
+    if not close_matches:
         return ["Movie not found. Please check the title or try a different one."]
     
+    # Use the first close match
+    title = close_matches[0]
+    idx = df[df['title'].str.lower() == title].index[0]
+
     sim_scores = list(enumerate(cosine_sim[idx]))
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
     sim_indices = [i[0] for i in sim_scores[1:11]]
