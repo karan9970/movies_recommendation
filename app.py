@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template
 import pickle
+import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 from difflib import get_close_matches  # Import for handling close matches
